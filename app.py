@@ -57,6 +57,20 @@ def thumbnail():
         return jsonify({'thumbnail_url': thumbnail_url})
     except Exception as e:
         return jsonify({'error': str(e)})
+    
+@app.route('/video_info', methods=['POST'])
+def video_info():
+    url = request.form['url']
+    try:
+        yt = YouTube(url)
+        info = {
+            'thumbnail_url': yt.thumbnail_url,
+            'title': yt.title
+        }
+        return jsonify(info)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Converter</title>
     <style>
-        /* シンプルなスタイル */
+        #thumbnail {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <h1>YouTube Converter</h1>
-    <input type="text" id="url" placeholder="YouTube URL" />
-    <button onclick="fetchThumbnail()">Get Thumbnail</button>
-    <img id="thumbnail" src="" alt="Thumbnail" style="display:none;" />
+    <input type="text" id="url" placeholder="YouTube URL" oninput="fetchVideoInfo()" />
+    <div id="video-info">
+        <img id="thumbnail" src="" alt="Thumbnail" style="display:none;" />
+        <div id="title"></div>
+    </div>
     
     <select id="format">
         <option value="mp3">MP3</option>
@@ -25,23 +30,38 @@
     <div id="progress"></div>
     
     <script>
-        function fetchThumbnail() {
+        function fetchVideoInfo() {
             const url = document.getElementById('url').value;
-            fetch('/thumbnail', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `url=${encodeURIComponent(url)}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.thumbnail_url) {
-                    const thumbnail = document.getElementById('thumbnail');
-                    thumbnail.src = data.thumbnail_url;
-                    thumbnail.style.display = 'block';
-                } else {
-                    alert('Error fetching thumbnail');
-                }
-            });
+            if (url) {
+                fetch('/video_info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `url=${encodeURIComponent(url)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.thumbnail_url && data.title) {
+                        const thumbnail = document.getElementById('thumbnail');
+                        const title = document.getElementById('title');
+                        
+                        thumbnail.src = data.thumbnail_url;
+                        thumbnail.style.display = 'block';
+                        title.textContent = data.title;
+                    } else {
+                        const thumbnail = document.getElementById('thumbnail');
+                        const title = document.getElementById('title');
+                        
+                        thumbnail.style.display = 'none';
+                        title.textContent = '';
+                    }
+                });
+            } else {
+                const thumbnail = document.getElementById('thumbnail');
+                const title = document.getElementById('title');
+                
+                thumbnail.style.display = 'none';
+                title.textContent = '';
+            }
         }
         
         function convert() {
